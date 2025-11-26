@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    environment {
+        PATH = "$PATH:/var/lib/jenkins/.local/bin"
+        IMAGE_NAME = "yashubg/imt2023117_assignment:latest"
+    }
+
     stages {
 
         stage('Clone from GitHub') {
@@ -9,7 +14,7 @@ pipeline {
             }
         }
 
-        stage('Install dependencies') {
+        stage('Install Dependencies') {
             steps {
                 sh 'pip3 install -r requirements.txt'
             }
@@ -17,32 +22,32 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                sh '''
-                    export PATH=$PATH:/var/lib/jenkins/.local/bin
-                    pytest
-                '''
+                sh 'pytest'
             }
         }
 
-        stage('Docker Login') {
+        stage('Build & Push Docker Image') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'YashubG', passwordVariable: '43200513Ya')]) {
-                    sh 'echo $PASS | docker login -u $USER --password-stdin'
+                script {
+                    // Use Jenkins Docker credentials to login and push
+                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub') {
+                        // Build the Docker image
+                        def appImage = docker.build("${IMAGE_NAME}")
+                        // Push image to Docker Hub
+                        appImage.push()
+                    }
                 }
             }
         }
-        
-        stage('Docker Build') {
-            steps {
-                sh 'docker build -t YashubG/imt2023117_assignment:latest .'
-            }
+
+    }
+
+    post {
+        success {
+            echo "Pipeline finished successfully! Docker image pushed: ${IMAGE_NAME}"
         }
-
-
-        stage('Push to Docker Hub') {
-            steps {
-                sh 'docker push YashubG/imt2023117_assignment:latest'
-            }
+        failure {
+            echo "Pipeline failed. Check console logs for errors."
         }
     }
 }
