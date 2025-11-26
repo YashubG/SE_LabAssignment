@@ -26,7 +26,7 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                sh 'docker build -t YashubG/IMT2023117_Assignment:latest .'
+                sh 'docker build -t YashubG/imt2023117_assignment:latest .'
             }
         }
 
@@ -40,7 +40,7 @@ pipeline {
 
         stage('Push to Docker Hub') {
             steps {
-                sh 'docker push YashubG/IMT2023117_Assignment:latest'
+                sh 'docker push YashubG/imt2023117_assignment:latest'
             }
         }
     }
