@@ -24,6 +24,14 @@ pipeline {
             }
         }
 
+        stage('Docker Login') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'YashubG', passwordVariable: '43200513Ya')]) {
+                    sh 'echo $PASS | docker login -u $USER --password-stdin'
+                }
+            }
+        }
+        
         stage('Docker Build') {
             steps {
                 sh 'docker build -t YashubG/imt2023117_assignment:latest .'
